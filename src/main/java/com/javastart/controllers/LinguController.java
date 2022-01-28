@@ -1,5 +1,6 @@
 package com.javastart.controllers;
 
+import com.javastart.formatter.ConsoleOutputWriter;
 import com.javastart.model.Entry;
 import com.javastart.services.FileService;
 import com.javastart.repositories.EntryRepository;
@@ -21,16 +22,19 @@ public class LinguController {
     private EntryRepository entryRepository;
     private FileService fileService;
     private Scanner scanner;
+    private ConsoleOutputWriter consoleOutputWriter;
 
     @Autowired
-    public LinguController(EntryRepository entryRepository, FileService fileService, Scanner scanner) {
+    public LinguController(EntryRepository entryRepository, FileService fileService,
+                           ConsoleOutputWriter consoleOutputWriter, Scanner scanner) {
         this.entryRepository = entryRepository;
         this.fileService = fileService;
+        this.consoleOutputWriter = consoleOutputWriter;
         this.scanner = scanner;
     }
 
     public void mainLoop() {
-        System.out.println("Witaj w aplikacji LinguApp");
+        consoleOutputWriter.println("Witaj w aplikacji LinguApp");
         int option = UNDEFINED;
         while(option != CLOSE_APP) {
             printMenu();
@@ -51,35 +55,35 @@ public class LinguController {
                 close();
                 break;
             default:
-                System.out.println("Opcja niezdefiniowana");
+                consoleOutputWriter.println("Opcja niezdefiniowana");
         }
     }
 
     private void test() {
         if(entryRepository.isEmpty()) {
-            System.out.println("Dodaj przynajmniej jedną frazę do bazy.");
+            consoleOutputWriter.println("Dodaj przynajmniej jedną frazę do bazy.");
             return;
         }
         final int testSize = entryRepository.size() > 10? 10 : entryRepository.size();
         Set<Entry> randomEntries = entryRepository.getRandomEntries(testSize);
         int score = 0;
         for (Entry entry : randomEntries) {
-            System.out.printf("Podaj tłumaczenie dla :\"%s\"\n", entry.getOriginal());
+            consoleOutputWriter.println(String.format("Podaj tłumaczenie dla :\"%s\"\n", entry.getOriginal()));
             String translation = scanner.nextLine();
             if(entry.getTranslation().equalsIgnoreCase(translation)) {
-                System.out.println("Odpowiedź poprawna");
+                consoleOutputWriter.println("Odpowiedź poprawna");
                 score++;
             } else {
-                System.out.println("Odpowiedź niepoprawna - " + entry.getTranslation());
+                consoleOutputWriter.println("Odpowiedź niepoprawna - " + entry.getTranslation());
             }
         }
-        System.out.printf("Twój wynik: %d/%d\n", score, testSize);
+        consoleOutputWriter.println(String.format("Twój wynik: %d/%d\n", score, testSize));
     }
 
     private void addEntry() {
-        System.out.println("Podaj oryginalną frazę");
+        consoleOutputWriter.println("Podaj oryginalną frazę");
         String original = scanner.nextLine();
-        System.out.println("Podaj tłumaczenie");
+        consoleOutputWriter.println("Podaj tłumaczenie");
         String translation = scanner.nextLine();
         Entry entry = new Entry(original, translation);
         entryRepository.add(entry);
@@ -88,18 +92,18 @@ public class LinguController {
     private void close() {
         try {
             fileService.saveEntries(entryRepository.getAll());
-            System.out.println("Zapisano stan aplikacji");
+            consoleOutputWriter.println("Zapisano stan aplikacji");
         } catch (IOException e) {
-            System.out.println("Nie udało się zapisać zmian");
+            consoleOutputWriter.println("Nie udało się zapisać zmian");
         }
-        System.out.println("Bye Bye!");
+        consoleOutputWriter.println("Bye Bye!");
     }
 
     private void printMenu() {
-        System.out.println("Wybierz opcję:");
-        System.out.println("0 - Dodaj frazę");
-        System.out.println("1 - Test");
-        System.out.println("2 - Koniec programu");
+        consoleOutputWriter.println("Wybierz opcję:");
+        consoleOutputWriter.println("0 - Dodaj frazę");
+        consoleOutputWriter.println("1 - Test");
+        consoleOutputWriter.println("2 - Koniec programu");
     }
 
     private int chooseOption() {
