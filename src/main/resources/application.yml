@@ -3,3 +3,6 @@ app:
     decorator: UPPERCASE
 filename:
   data.csv
+spring:
+  profiles:
+    active: prod
